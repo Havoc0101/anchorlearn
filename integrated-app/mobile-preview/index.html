@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff"><meta name="description" content="手绘录音便签，本地交互演示。">
+  <title>课程作业安排 · 录音便签</title>
+  <link rel="icon" href="assets/cat.png"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="integration/review.css">
+  <script src="integration/review-data.js" defer></script><script src="integration/review-api.js" defer></script>
+  <script src="integration/config.js" defer></script><script src="integration/demo-cases.js" defer></script>
+  <script src="model.js" defer></script><script src="app.js" defer></script><script src="integration/review-page.js" defer></script>
+</head>
+<body>
+  <svg class="symbols" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="back" viewBox="0 0 24 24"><path d="M20 12H4m7-7-7 7 7 7"/></symbol>
+    <symbol id="more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+    <symbol id="mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M9 22h6M2 4l2 1M1 12h2M20 5l2-1M21 12h2"/></symbol>
+    <symbol id="calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 2v6M16 2v6M3 11h18"/></symbol>
+    <symbol id="smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 14q4 5 8 0M8 9h.1M16 9h.1"/></symbol>
+    <symbol id="close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  </svg>
+  <div class="phone">
+    <div class="app-screen">
+      <main id="main">
+        <section id="detail-view" aria-label="录音便签详情">
+          <header class="page-header">
+            <div class="toolbar"><button class="icon-button" data-view="home" aria-label="返回我的录音"><svg><use href="#back"/></svg></button><button class="icon-button" id="more-button" aria-label="页面说明"><svg><use href="#more"/></svg></button></div>
+            <h1><img id="original-title" class="title-lettering" src="assets/title.png" alt="课程作业安排"><span id="connected-title" hidden></span></h1>
+            <p class="metadata" id="original-metadata">9月25日 · 14:30 · 12分钟 <span class="demo-label">示例</span></p>
+            <p class="metadata" id="connected-metadata" hidden></p>
+          </header>
+          <div class="notebook" data-tab="content" id="notebook">
+            <svg class="paper-shape" aria-hidden="true" preserveAspectRatio="none"><defs><linearGradient id="paper-wash"><stop offset="0" stop-color="#fff"/><stop offset="72%" stop-color="#fff"/><stop offset="100%" id="wash-stop" stop-color="#fff4b5"/></linearGradient></defs><path id="paper-path" fill="url(#paper-wash)"/></svg>
+            <div class="side-tabs" role="tablist" aria-label="便签内容" aria-orientation="vertical">
+              <button id="tab-content" class="side-tab content-tab" role="tab" aria-selected="true" aria-controls="panel-content" data-tab="content"><span class="tab-symbol" aria-hidden="true">( )</span><span>内容</span></button>
+              <button id="tab-pending" class="side-tab pending-tab" role="tab" aria-selected="false" aria-controls="panel-pending" tabindex="-1" data-tab="pending"><span class="tab-symbol" aria-hidden="true">?</span><span>待确认</span><span class="pending-dot" id="pending-dot" aria-hidden="true"></span></button>
+              <button id="tab-attention" class="side-tab attention-tab" role="tab" aria-selected="false" aria-controls="panel-attention" tabindex="-1" data-tab="attention"><span class="tab-symbol" aria-hidden="true">!</span><span>注意</span></button>
+            </div>
+            <div class="paper-content">
+              <section id="panel-content" role="tabpanel" aria-labelledby="tab-content" tabindex="0">
+                <div class="note-heading"><h2><img src="assets/content-heading.png" alt="这次要做什么"></h2><div class="cat-wrap"><span aria-hidden="true">(</span><img src="assets/cat.png" alt="括号猫，用户原创插画"><span aria-hidden="true">)</span></div></div>
+                <ul class="ruled-list" id="original-content">
+                  <li><h3>完成课程报告</h3><p>结合课堂案例，整理核心观点</p></li>
+                  <li><h3>阅读材料</h3><p>第三章、课程讲义</p></li>
+                  <li><h3>截止时间</h3><p id="deadline-summary">日期待确认 <button class="inline-link" data-tab-link="pending">去核对 ›</button></p></li>
+                  <li><h3>建议安排</h3><p>先阅读 → 列提纲 → 写作与检查</p><small>AI 建议，可修改</small></li>
+                </ul>
+                <div id="connected-content" hidden></div>
+                <div class="paper-actions" id="original-actions"><button class="source-link" data-source>查看原文与录音 <svg><use href="#chevron"/></svg></button><div class="checkers" aria-hidden="true"></div><button class="primary" id="join-button">核对并加入日程</button><p class="action-caption" id="schedule-caption" hidden></p></div>
+              </section>
+              <section id="panel-pending" role="tabpanel" aria-labelledby="tab-pending" tabindex="0" hidden>
+                <div class="note-heading pending-heading"><h2><img id="original-pending-heading" src="assets/pending-heading.png" alt="这两处，确认一下"><span id="connected-pending-heading" hidden>核对后，再保存</span></h2><div class="dog-wrap"><span aria-hidden="true">?</span><img src="assets/dog.png" alt="问号狗，用户原创插画"></div></div>
+                <form id="review-form">
+                  <div class="question"><span class="question-number">01</span><div><h3><label for="deadline">截止时间需要核对</label></h3><blockquote>「下周五之前交上来」</blockquote><p class="field-help">请确认具体日期，原话未说明几点</p><input type="date" id="deadline" aria-describedby="date-help"><label class="check-line"><input type="checkbox" id="no-deadline">尚无明确日期</label><small id="date-help">不确定时可以先留空</small></div></div>
+                  <div class="question"><span class="question-number">02</span><div><h3 id="format-heading">提交文件尚未明确</h3><blockquote>「按之前说的格式提交」</blockquote><p class="field-help">录音未说明 PDF 还是 Word</p><div class="format-options" role="group" aria-labelledby="format-heading"><label><input type="radio" name="format" value="PDF"><span>PDF</span></label><label><input type="radio" name="format" value="Word"><span>Word</span></label><label><input type="radio" name="format" value="later"><span>稍后确认</span></label></div></div></div>
+                  <p class="pending-help" id="pending-help">这些信息有疑问，尚未加入日程</p>
+                  <div class="paper-actions"><button type="button" class="source-link" data-source>查看原文与录音 <svg><use href="#chevron"/></svg></button><div class="checkers" aria-hidden="true"></div><p id="review-feedback" class="feedback" role="status"></p><button class="primary" type="submit">保存确认结果</button></div>
+                </form>
+                <div id="connected-review" hidden></div>
+              </section>
+              <section id="panel-attention" role="tabpanel" aria-labelledby="tab-attention" tabindex="0" hidden>
+                <div class="note-heading attention-heading"><h2>这几件事，别漏掉</h2><span class="big-alert" aria-hidden="true">!</span></div>
+                <ul class="ruled-list" id="original-attention"><li><h3>报告要结合课堂案例</h3><p>别只摘抄资料，写出你的理解。</p><button class="inline-link" data-source>对照原话 ›</button></li><li><h3>先核对，再安排</h3><p id="attention-review-status">截止日期与提交格式还需确认。</p><button class="inline-link" data-tab-link="pending">查看待确认信息 ›</button></li><li><h3>建议不等于老师要求</h3><p>阅读、提纲、写作是建议顺序，可以按实际情况调整。</p><small>AI 建议 · 示例</small></li></ul>
+                <div id="connected-attention" hidden></div>
+                <div class="paper-actions" id="original-attention-actions"><div class="checkers" aria-hidden="true"></div><button class="primary" id="attention-read">我记住了</button></div>
+              </section>
+            </div>
+          </div>
+        </section>
+        <section id="home-view" class="simple-view" aria-label="我的录音" hidden><header class="simple-header"><h1>我的录音</h1><button id="new-recording" class="icon-button" aria-label="体验新录音提醒">＋</button></header><p class="metadata">9月25日 <span class="demo-label">示例录音</span></p><button class="record-card" data-view="detail"><span class="record-dot"></span><span><strong>课程作业安排</strong><small>14:30 · 12分钟</small><span>课程报告、阅读材料与提交要求</span></span><svg><use href="#chevron"/></svg></button><p class="quiet-note">每一段录音，留下一张便签。</p></section>
+        <section id="schedule-view" class="simple-view" aria-label="建议日程" hidden><header class="simple-header"><h1>建议日程</h1></header><p class="metadata">先做什么，一件一件来</p><div id="schedule-empty" class="empty-state"><svg><use href="#calendar"/></svg><h2>下一步，还等你确认</h2><p>核对示例便签并确认加入后，示例日程会出现在这里。</p><button class="primary" data-view="detail">去看看便签</button></div><article id="schedule-card" class="schedule-card" hidden><span class="demo-label">已确认 · 本地保存</span><h2>完成课程报告</h2><p id="schedule-date"></p><p id="schedule-format"></p><ol><li>阅读第三章与课程讲义</li><li>结合课堂案例，列出提纲</li><li>完成写作，检查提交文件</li></ol><small>建议顺序 · 可按实际情况调整</small><label class="complete-line"><input type="checkbox" id="task-complete">这项任务已完成</label><button class="source-link" data-view="detail">查看原便签 ›</button></article><p class="quiet-note">上方示例日程仅保存在此浏览器，尚未接入系统日历和通知。</p></section>
+        <section id="profile-view" class="simple-view" aria-label="我的" hidden><header class="simple-header"><h1>我的</h1></header><article class="about-paper"><img src="assets/cat.png" alt="括号猫" class="about-cat"><h2>把重要的事，慢慢做好。</h2><p>这是录音便签的本地交互演示。猫狗沿用你们的原创图稿。</p><h3>现在可以体验</h3><p>切换页签、核对信息、加入日程、标记完成。保存后刷新仍可查看。</p><h3>接下来再接入</h3><p>文字分析入口已准备，需连接后端；真实录音、转写、录音豆同步和系统提醒仍待接入。示例与后端结果会分别标注。</p><button class="secondary" id="show-demo-popup">体验新录音提醒</button><p class="quiet-note">示例保存到本机；正式任务仅在后端确认成功后显示已保存。</p></article></section>
+      </main>
+      <nav class="bottom-nav" aria-label="主要导航"><button data-view="home" aria-current="page"><svg><use href="#mic"/></svg><span>录音</span></button><button data-view="schedule"><svg><use href="#calendar"/></svg><span>日程</span></button><button data-view="profile"><svg><use href="#smile"/></svg><span>我的</span></button></nav>
+    </div>
+  </div>
+  <p class="desktop-caption">录音便签 · 本地交互演示</p>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <dialog id="source-dialog" aria-labelledby="source-title"><button class="dialog-close icon-button" data-close aria-label="关闭原文"><svg><use href="#close"/></svg></button><span class="demo-label">示例原文</span><h2 id="source-title">回到老师的原话</h2><div class="transcript"><p><time>00:18</time>请大家完成一份课程报告，结合课堂案例，写出自己的理解。</p><p><time>01:42</time>先阅读第三章和课程讲义，再整理核心观点。</p><p><time>03:06</time>下周五之前交上来，按之前说的格式提交。</p></div><p class="quiet-note">本例未附音频，暂时不能回听。资料仅为录音中提及，未附文件。</p><button class="secondary" data-close>返回便签</button></dialog>
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title"><button class="dialog-close icon-button" data-close aria-label="关闭日程核对"><svg><use href="#close"/></svg></button><h2 id="confirm-title">再看一眼，就安排好</h2><h3>完成课程报告</h3><p id="confirm-date"></p><p id="confirm-format"></p><p class="quiet-note">将保存到本页的「日程」，不会写入系统日历。</p><p id="confirm-error" class="feedback" role="alert"></p><button class="primary" id="confirm-join">确认加入日程</button><button class="text-button" data-close>再改一下</button></dialog>
+  <dialog id="recording-dialog" class="recording-dialog" aria-labelledby="recording-title"><img class="popup-cat" src="assets/popup-cat.png" alt="探头的括号猫"><button class="dialog-close icon-button" data-close aria-label="关闭新录音提醒"><svg><use href="#close"/></svg></button><h2 id="recording-title">新录音已整理</h2><div class="popup-summary"><h3>课程作业安排</h3><p>12分钟 · 摘要已生成</p></div><p>重要内容已整理成便签<br>点开看看这次要做什么</p><button class="primary" id="view-new-task">查看任务</button><small>示例提醒 · 关闭后，便签仍保留在首页</small></dialog>
+  <noscript><p>请启用 JavaScript 以体验便签交互。</p></noscript>
+</body>
+</html>

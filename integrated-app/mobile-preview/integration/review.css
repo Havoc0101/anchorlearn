@@ -1,0 +1,34 @@
+/* Reuse the approved colors and paper; only lay out dynamic text and forms. */
+#connected-title { font-family:var(--hand); font-size:32px; line-height:1.4; overflow-wrap:anywhere; }
+#connected-pending-heading { font-family:var(--hand); font-size:24px; color:var(--heading); line-height:1.6; }
+.pending-heading:has(#connected-pending-heading:not([hidden])) h2 { margin-right:0; }
+.pending-heading:has(#connected-pending-heading:not([hidden])) .dog-wrap { width:88px; }
+#connected-content, #connected-review, #connected-attention { min-width:0; overflow-wrap:anywhere; }
+.connected-summary { margin:0 0 12px; color:#566176; }
+.connected-points { font-size:13px; color:var(--muted); padding-left:19px; }
+.connected-points li { margin:7px 0; }
+.connected-fields { border:0; padding:0; margin:0; min-width:0; }
+.connected-label { display:block; font-weight:600; font-size:14px; margin:12px 0 6px; }
+.connected-fields input, .connected-fields textarea {
+  width:100%; min-width:0; max-width:100%; border:1px solid #8993a2; border-radius:6px;
+  background:#fff; color:var(--ink); font:inherit; font-size:16px; line-height:1.6; padding:8px;
+}
+.connected-fields textarea { resize:vertical; min-height:72px; }
+.connected-fields input:focus-visible, .connected-fields textarea:focus-visible { outline:3px solid #3888c5; outline-offset:2px; }
+.connected-fields:disabled input, .connected-fields:disabled textarea { background:#f5f7f3; }
+#connected-content details { font-size:13px; color:var(--muted); margin-top:8px; }
+#connected-content summary { cursor:pointer; min-height:36px; padding-top:5px; }
+#connected-content blockquote { margin:5px 0; white-space:pre-wrap; }
+#connected-source-dialog .transcript p { white-space:pre-wrap; overflow-wrap:anywhere; }
+#connected-confirm-dialog p, #connected-confirm-dialog h3 { overflow-wrap:anywhere; }
+.connected-demo-buttons { display:flex; gap:10px; flex-wrap:wrap; margin:18px 0; }
+#connected-review .secondary { margin-top:10px; }
+#connected-saved h2 { font-size:20px; margin-top:28px; }
+#connected-note-card { flex-direction:column; align-items:flex-start; }
+#connected-note-card span { display:flex; flex-direction:column; gap:6px; }
+#home-view > .secondary { margin-top:15px; }
+@media(max-width:375px) {
+  #connected-title { font-size:27px; }
+  #connected-pending-heading { font-size:21px; }
+  .pending-heading:has(#connected-pending-heading:not([hidden])) .dog-wrap { width:73px; }
+}

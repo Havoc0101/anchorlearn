@@ -1,3 +1,5 @@
+> 最新飞书导入版：见 [启动说明](integrated-app/FEISHU-START.md)，可运行源码位于 `integrated-app/`。下载包位于 `integrated-handoff/feishu-import-2026-09-26/`。
+
 # AnchorLearn · 接着学
 
 面向成人学习场景的音频整理原型：**音频 → 本机转写 → 校对文字 → 重点与待办**。
