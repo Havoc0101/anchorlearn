@@ -35,7 +35,7 @@ python3 -m venv .venv
 - 点击整理时，文字、日期和补充说明发送到 DeepSeek 官方接口，调用费用由 API 账户承担。
 - Key 只读取到服务进程中，不写入页面或日志。
 - 服务仅监听本机，不是面向公网的生产服务。
-- 未实现任务保存、通知、日历、麦克风录音、说话人身份识别和硬件接入。
+- 已实现用户确认后的 SQLite 任务保存与读取接口；前端保存按钮待队友接入。未实现通知、日历、麦克风录音、说话人身份识别和硬件接入。
 - 模型可能误听、误解或编造，请核对原句。日期字段不包含具体时刻。
 - 当前为 AI 工作流原型，尚未实现自主工具调用 Agent。
 
@@ -82,7 +82,7 @@ Content-Type 为 `application/json`：
 ## 验证
 
 ```bash
-.venv/bin/python -m unittest test_backend test_audio
+.venv/bin/python -m unittest test_backend test_audio test_tasks
 ```
 
 测试覆盖请求构造、结果校验、空任务、澄清依据、音频解码和无效输入；模拟模型调用不消耗 API 额度，不代表语义准确率评估。
@@ -90,6 +90,8 @@ Content-Type 为 `application/json`：
 ## 文件
 
 - `server.py`：HTTP 服务、DeepSeek 调用及结果校验。
+- `tasks.py`：SQLite 保存、读取和幂等确认。
+- [任务接口约定](API-TASKS.md)：请求、返回及重试说明。
 - `transcribe.py`：本地音频解码和转写。
 - `index.html`：上传、回听、校对和卡片展示。
 - `setup_audio.py`：首次模型下载。

@@ -2,6 +2,8 @@ import datetime as dt
 import getpass
 import json
 import os
+import sqlite3
+from tasks import confirm_tasks, list_tasks, Conflict
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib import request, error
@@ -134,15 +136,22 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
+        if self.headers.get('Host') not in ('127.0.0.1:8765', 'localhost:8765'):
+            return self.send(403, {'error': '仅允许本机访问'})
         if self.path == '/':
             self.send(200, Path(__file__).with_name('index.html').read_bytes(), 'text/html; charset=utf-8')
+        elif self.path == '/api/tasks':
+            try:
+                self.send(200, list_tasks())
+            except sqlite3.Error:
+                self.send(503, {'error': '任务存储暂不可用，请稍后重试'})
         elif self.path == '/health':
             self.send(200, {'ok': True, 'key_configured': bool(KEY)})
         else:
             self.send(404, {'error': '接口不存在'})
 
     def do_POST(self):
-        if self.path not in ('/api/analyze', '/api/transcribe'):
+        if self.path not in ('/api/analyze', '/api/transcribe', '/api/tasks/confirm'):
             return self.send(404, {'error': '接口不存在'})
         allowed = ('127.0.0.1:8765', 'localhost:8765')
         if self.headers.get('Host') not in allowed or self.headers.get('Origin') not in (None, *(f'http://{h}' for h in allowed)):
@@ -164,7 +173,15 @@ class Handler(BaseHTTPRequestHandler):
             size = int(self.headers.get('Content-Length', '0'))
             if not 0 < size <= 60000:
                 raise ValueError('请求为空或过大')
-            text, date = validate_input(json.loads(self.rfile.read(size)))
+            data = json.loads(self.rfile.read(size))
+            if self.path == '/api/tasks/confirm':
+                try:
+                    return self.send(200, confirm_tasks(data))
+                except Conflict as exc:
+                    return self.send(409, {'error': str(exc)})
+                except sqlite3.Error:
+                    return self.send(503, {'error': '保存结果未确认，请保留相同 request_id 和原内容重试'})
+            text, date = validate_input(data)
         except (ValueError, UnicodeError) as exc:
             return self.send(400, {'error': str(exc)})
         try:
@@ -177,7 +194,7 @@ if __name__ == '__main__':
     if not KEY:
         KEY = getpass.getpass('粘贴DeepSeek 官方 API Key（输入不显示；回车可先看页面）：').strip()
     print('打开 http://127.0.0.1:8765 ，按 Control+C 停止。')
-    print('点击分析会把文字发送至DeepSeek 官方云端；结果仅为草稿，本程序不保存内容、不设置提醒。')
+    print('点击分析会把文字发送至DeepSeek 官方云端；分析结果仅为草稿；确认保存接口可保存任务，不设置提醒。')
     try:
         ThreadingHTTPServer(('127.0.0.1', 8765), Handler).serve_forever()
     except KeyboardInterrupt:
