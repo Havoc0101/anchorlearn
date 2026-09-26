@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="AnchorLearn 锚学社，锚定终身学习。录音豆，锚定每个声音。把录音整理为可核对的重点与下一步。">
+  <title>AnchorLearn 锚学社 · 锚定终身学习</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%23ffffff'/%3E%3Cpath d='M12 28 20 10 28 28M15 23h10' fill='none' stroke='%2342443e' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="landing.css">
+  <script src="landing.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <a class="brand" href="landing.html" aria-label="AnchorLearn 锚学社首页"><span class="brand-mark" aria-hidden="true">A<span>·</span></span><span>AnchorLearn<small>锚学社</small></span></a>
+    <nav aria-label="网站导航"><a href="#studio">认识录音豆</a><a href="#how-it-works">使用方式</a><a href="#product">产品体验</a></nav>
+    <a class="button button-small glass-button product-orbit" href="index.html#home" aria-label="进入产品" data-spring><span class="orbit-label">进入<br>产品</span></a>
+  </header>
+  <main id="main">
+    <section class="studio" id="studio" aria-labelledby="hero-title">
+      <p class="studio-eyebrow">ANCHORLEARN <span aria-hidden="true">/</span> 锚定终身学习</p>
+      <div class="display-word" aria-hidden="true">ANCHOR</div>
+      <div class="object-stage">
+        <div class="ground-shadow" id="ground-shadow" aria-hidden="true"></div>
+        <canvas id="recorder-canvas" tabindex="0" role="img" aria-label="录音豆与官方收纳壳外形三维展示。点击或按回车分离，分离后拖动旋转录音豆，空格体验按键，Home 复位。" aria-describedby="viewer-help">你的浏览器不支持三维画布，请查看下方录音豆示意。</canvas>
+        <svg id="recorder-fallback" class="recorder-fallback" viewBox="0 0 500 380" role="img" aria-label="录音豆与收纳壳静态示意" hidden><defs><radialGradient id="fallback-face"><stop stop-color="#66665f"/><stop offset="1" stop-color="#343631"/></radialGradient><linearGradient id="fallback-edge"><stop stop-color="#8a8b82"/><stop offset="1" stop-color="#353630"/></linearGradient></defs><path d="M120 65H272V115A58 58 0 0 0 388 115V286Q388 316 358 316H120Q90 316 90 286V95Q90 65 120 65Z" fill="#363d47" stroke="#68717f" stroke-width="2"/><g transform="translate(330 109) rotate(-16) scale(.40)"><ellipse cy="29" rx="150" ry="114" fill="url(#fallback-edge)"/><ellipse rx="150" ry="114" fill="url(#fallback-face)" stroke="#92918a" stroke-width="2"/><rect x="-48" y="-88" width="75" height="17" rx="8" fill="#252722"/><rect x="-26" y="73" width="75" height="17" rx="8" fill="#252722"/><circle cx="-12" cy="-58" r="4" fill="#b8ab7d"/><path d="M-32-79h42M-9 81h40" stroke="#777970" stroke-width="2" stroke-dasharray="2 4"/></g></svg>
+        <div class="object-annotation"><span class="annotation-line" aria-hidden="true"></span><p>Together, then free.<br><em>A little space for sound.</em></p></div>
+        <div class="sound-card glass-card" id="sound-card"><div class="sound-card-top"><span class="signal-dot" aria-hidden="true"></span><span id="sound-state">让每个声音，有处安放。</span></div><div class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="sound-card-bottom"><span>声音 · 重点 · 下一步</span><span aria-hidden="true">↗</span></div></div>
+      </div>
+      <div class="viewer-controls"><span id="viewer-help">轻点，让录音豆与壳子分离</span><span class="control-divider" aria-hidden="true"></span><button id="reset-view" class="icon-control" aria-label="复位三维视角" data-spring>↺</button><button id="separate-device" class="press-control" data-spring>取出录音豆 ↗</button><button id="press-device" class="press-control" data-spring hidden>试试按键</button><button id="toggle-motion" class="icon-control" aria-label="暂停自动旋转" aria-pressed="false" data-spring>Ⅱ</button></div>
+      <p class="viewer-status sr-only" id="viewer-status" role="status"></p>
+      <h1 id="hero-title" class="sr-only">AnchorLearn 锚学社，锚定终身学习</h1>
+    </section>
+    <section class="how-section section-wrap" aria-labelledby="how-title">
+      <div class="how-heading" id="how-it-works"><div><p class="eyebrow">使用流程 / FOLLOW THE FLOW</p><h2 id="how-title">收到录音之后，<br><span>照着这条线往下走。</span></h2></div><p>先看内容 → 核对疑问 → 检查注意事项。<br>点击流程节点，就能看到对应的软件界面。</p></div>
+      <div class="walkthrough"><div class="guide-copy"><ol class="flow-chart" aria-label="收到录音后的六步使用流程">
+        <li><button class="flow-node" data-step="0" aria-pressed="true" aria-controls="guide-detail product-guide-frame" data-spring><span class="flow-number">1</span><span class="flow-body"><span class="flow-kicker">收到提醒</span><strong>录音整理好，提示框出现</strong><span class="flow-description">看到「新录音已整理」，先看录音名称与摘要。</span><span class="flow-action">下一步：点提示框里的「查看任务」 ↓</span></span><svg class="flow-cat" viewBox="2040 590 330 215" role="img" aria-label="跳起来的小猫"><image href="assets/landing-cats-original.png" width="2800" height="1840"/></svg></button></li>
+        <li><button class="flow-node" data-step="1" aria-pressed="false" aria-controls="guide-detail product-guide-frame" data-spring><span class="flow-number">2</span><span class="flow-body"><span class="flow-kicker">打开软件</span><strong>点开提醒，进入这张便签</strong><span class="flow-description">看到录音标题、时间和整理结果。右侧三个符号，就是三个入口。</span><span class="flow-action">下一步：先点「（ ）内容」 ↓</span></span><svg class="flow-cat" viewBox="950 1168 220 200" role="img" aria-label="新增的长尾小猫"><image href="assets/landing-animals-expanded.png" width="2800" height="1840"/></svg></button></li>
+        <li><button class="flow-node flow-content" data-step="2" aria-pressed="false" aria-controls="guide-detail product-guide-frame" data-spring><span class="flow-number">3</span><span class="flow-body"><span class="flow-kicker">先看这里 · 括号猫</span><strong>（ ）内容：这次说了什么，要做什么</strong><span class="flow-description">看重点、任务和相关资料；点黄点展开详情，需要时查看原文与录音。</span><span class="flow-action">下一步：去「？待确认」核对疑问 ↓</span></span><svg class="flow-cat" viewBox="2040 825 330 205" role="img" aria-label="抱着鱼的小猫"><image href="assets/landing-cats-original.png" width="2800" height="1840"/></svg></button></li>
+        <li><button class="flow-node flow-pending" data-step="3" aria-pressed="false" aria-controls="guide-detail product-guide-frame" data-spring><span class="flow-number">4</span><span class="flow-body"><span class="flow-kicker">再核对 · 问号狗</span><strong>？待确认：哪些信息还不清楚</strong><span class="flow-description">对照原话检查日期、提交格式和任务要求；可以修改，不清楚就先保留待确认。</span><span class="flow-action">下一步：再看「！注意」 ↓</span></span><svg class="flow-cat" viewBox="2120 1050 225 210" role="img" aria-label="坐着的小猫"><image href="assets/landing-cats-original.png" width="2800" height="1840"/></svg></button></li>
+        <li><button class="flow-node flow-attention" data-step="4" aria-pressed="false" aria-controls="guide-detail product-guide-frame" data-spring><span class="flow-number">5</span><span class="flow-body"><span class="flow-kicker">最后检查 · 感叹号狐</span><strong>！注意：哪些要求别漏掉</strong><span class="flow-description">检查特别要求、容易遗漏的事项，区分录音原话和 AI 建议。</span><span class="flow-action">下一步：检查完，再确认保存 ↓</span></span><svg class="flow-cat flow-dog" viewBox="625 1010 200 300" role="img" aria-label="新增的斑点小狗"><image href="assets/landing-animals-expanded.png" width="2800" height="1840"/></svg></button></li>
+        <li><button class="flow-node" data-step="5" aria-pressed="false" aria-controls="guide-detail product-guide-frame" data-spring><span class="flow-number">6</span><span class="flow-body"><span class="flow-kicker">接下来做什么</span><strong>确认保存，从第一步开始做</strong><span class="flow-description">核对后按便签上的保存按钮操作，再到「日程」查看已确认任务与建议。</span><span class="flow-action">保存由你确认；下次回来继续查看。</span></span><svg class="flow-cat" viewBox="2050 1280 275 215" role="img" aria-label="翘尾巴的小猫"><image href="assets/landing-cats-original.png" width="2800" height="1840"/></svg></button></li>
+      </ol><p class="flow-note">提醒流程使用现有示例演示；录音豆自动同步与系统通知尚未接入。流程图不会代你修改或保存任务。</p></div>
+      <div class="product-guide" id="product"><div class="guide-preview-heading"><span id="step-count">01 / 06</span><strong>跟着流程，看原版软件</strong></div><div class="live-product glass-card"><div class="browser-bar"><span class="window-dots" aria-hidden="true">● ● ●</span><span>AnchorLearn / 当前软件界面</span><button id="refresh-product" class="refresh-product" aria-label="刷新软件界面" title="刷新软件界面" data-spring>↻</button><a href="index.html#home" aria-label="完整打开产品">↗</a></div><iframe id="product-guide-frame" title="AnchorLearn 原版软件，展示流程对应的界面" src="index.html?landing=latest#home" loading="lazy"></iframe></div><div id="guide-detail" class="guide-detail" aria-live="polite"></div><p class="guide-caption" id="guide-caption">示例提醒 · 点击查看任务，进入录音便签</p><div class="guide-actions"><a class="quiet-link" href="index.html#home">完整打开软件 ↗</a><button class="quiet-link" id="next-step" data-spring>下一步 →</button></div></div></div>
+    </section>
+    <section class="roadmap section-wrap" id="roadmap" aria-labelledby="roadmap-title"><div class="roadmap-heading"><div><p class="eyebrow">WHAT COMES NEXT</p><h2 id="roadmap-title">陪伴，再向前一步。</h2></div><p>以下是后续开发方向，尚未上线。<br>从学习支持，慢慢走向更多日常场景。</p></div><div class="roadmap-grid">
+      <article class="roadmap-card glass-card"><span class="plan-tag">规划中</span><span class="roadmap-symbol" aria-hidden="true">≈</span><h3>情绪感知</h3><p>探索结合声音线索与主动反馈，帮助你回顾自己的状态，调整学习节奏。</p><small>由你确认感受，不把声音线索当作情绪结论。</small></article>
+      <article class="roadmap-card glass-card"><span class="plan-tag">持续探索</span><span class="roadmap-symbol" aria-hidden="true">· · ·</span><h3>更 ADHD 友好的学习体验</h3><p>在简洁阅读与重点提示的基础上，继续探索任务拆分、温和提醒和一次只看当前一步。</p><small>支持不同注意力习惯，让开始更轻松。</small></article>
+      <article class="roadmap-card glass-card"><span class="plan-tag">规划中 · 尚未接入</span><span class="roadmap-symbol" aria-hidden="true">↗</span><h3>一键求助，让家人知道</h3><p>计划在录音时遇到危险的场景下，由你主动触发求助，向预设家人发送求助信息与经授权的位置。</p><small>需后续接入设备、定位和通知服务；当前页面不能发送求救。</small></article>
+    </div></section>
+    <section class="faq-section section-wrap" id="questions" aria-labelledby="faq-title"><div><p class="eyebrow">开始之前</p><h2 id="faq-title">一些小问题。</h2></div><div class="faq-list">
+      <details><summary>没有录音豆，也可以开始吗？<span aria-hidden="true">＋</span></summary><p>可以。当前 Web 产品可以导入已有音频，也可以粘贴文字整理。录音豆自动同步与手机 App 仍待接入。</p></details>
+      <details><summary>AI 整理的任务，会自动保存吗？<span aria-hidden="true">＋</span></summary><p>不会。先展示草稿，你核对任务、日期与原话后，再确认保存。建议的第一步与原文要求分开，日期不清楚就保持待确认。</p></details>
+      <details><summary>我的录音和文字，会到哪里？<span aria-hidden="true">＋</span></summary><p>当前本地版在电脑上转写音频。点击整理后，校对文字与录音日期会发送到 DeepSeek；确认后的任务由本机服务保存。真实分析需要先在产品内连接模型服务。</p></details>
+      <details><summary>首页可以转动的录音豆是什么？<span aria-hidden="true">＋</span></summary><p>这是依据 soundcore Work 录音豆与官方收纳壳参考图制作的网页 3D 展示模型。进入时缓慢旋转，点击后分离，再拖动录音豆或体验按键回弹。它不是厂家的工程模型，按键演示不会开始真实录音。</p></details>
+    </div></section>
+    <section class="closing"><p class="eyebrow">ANCHORLEARN · 锚学社</p><h2>锚定终身学习。</h2><p>每一次听见，都是新的起点。</p><a class="button primary-button" href="index.html#recording" data-spring>从这一段录音开始 <span aria-hidden="true">↗</span></a></section>
+  </main>
+  <footer class="site-footer"><a class="brand" href="landing.html">AnchorLearn<small>锚学社</small></a><span>录音豆，锚定每个声音。</span><a href="#studio">回到顶部 ↑</a></footer>
+  <noscript><p class="noscript-note">请启用 JavaScript 来旋转录音豆和查看步骤演示。你仍可通过“进入产品”打开产品页面。</p></noscript>
+</body>
+</html>
