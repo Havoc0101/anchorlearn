@@ -1,0 +1,2 @@
+# Existing B transcription engine, now installed for the real audio workflow.
+faster-whisper==1.2.1
