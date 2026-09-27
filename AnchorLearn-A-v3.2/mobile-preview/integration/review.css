@@ -68,3 +68,14 @@
 @media (forced-colors:active) {
   .reading-who, .reading-action, .reading-object, .reading-focus { color:CanvasText; background:Canvas; }
 }
+
+#connected-provider { width: 100%; padding: 12px; font: inherit; color: inherit; background: white; border: 1px solid #8995a5; border-radius: 10px; margin-bottom: 12px; }
+
+/* Short reading blocks; original wording stays available in disclosures. */
+.connected-points li, .requirement-list li { line-height: 1.75; margin-bottom: .65rem; overflow-wrap: anywhere; }
+.connected-summary { line-height: 1.8; }
+.reading-options { margin-bottom: 1rem; }
+.task-due { font-weight: 700; }
+.task-first-step { padding: .8rem 1rem; border-left: 3px solid #627c65; background: #f3f6ef; line-height: 1.7; }
+.requirement-heading { margin-bottom: .4rem; font-weight: 600; }
+.requirement-list { padding-left: 1.4rem; margin-top: 0; }

@@ -9,7 +9,7 @@
   const openRecordingOnLoad = location.hash === '#recording';
   const openReadingOnLoad = location.hash === '#reading';
   let readingHighlight = true;
-  let readingMode = 'grammar';
+  let readingMode = 'focus';
   let selectedAudio = null, audioUrl = null, transcribedFile = null;
   let active = false, mode = null, review = null, input = null, caseKey = null;
   let edits = [], answers = [], dirty = false, busy = false;
@@ -132,22 +132,42 @@
     $('#connected-note-summary').textContent = mode === 'demo' ? '接口示例 · 点击继续核对' : input.audioName ? '本次录音 · 点击核对任务' : '本次分析 · 文字输入';
   }
 
+  function renderRequirements(parent, text) {
+    if (!text) return;
+    add(parent, 'p', '交付要求', 'requirement-heading');
+    const list = add(parent, 'ul', undefined, 'requirement-list');
+    // Split only at explicit list separators; keep commas and negation together.
+    text.split(/[；;\n]+/).map(part => part.trim()).filter(Boolean)
+      .forEach(part => add(list, 'li', part));
+  }
+
   function renderSummary(parent) {
     const current = review;
     const box = add(parent, 'div', undefined, 'reading-sample summary-reading');
-    const status = add(box, 'p', '', 'reading-caption'); status.setAttribute('role', 'status');
-    const select = readingSelector(box);
-    const label = add(box, 'label', undefined, 'reading-toggle');
+    add(box, 'h3', '先看重点');
+    const options = add(box, 'details', undefined, 'reading-options');
+    add(options, 'summary', '阅读显示设置');
+    const status = add(options, 'p', '', 'reading-caption'); status.setAttribute('role', 'status');
+    const select = readingSelector(options);
+    const label = add(options, 'label', undefined, 'reading-toggle');
     const toggle = add(label, 'input'); toggle.type = 'checkbox'; toggle.checked = readingHighlight;
     toggle.setAttribute('aria-label', '摘要重点高亮'); add(label, 'span', '重点高亮');
-    const legend = add(box, 'div', undefined, 'reading-legend');
+    const legend = add(options, 'div', undefined, 'reading-legend');
     for (const [role, caption] of [['who', '主语'], ['action', '谓语'], ['object', '宾语']]) add(legend, 'span', caption, 'reading-' + role);
-    const summary = add(box, 'p', undefined, 'connected-summary');
+    let summaryParent = box;
+    if (current.summary.length > 60) {
+      summaryParent = add(box, 'details');
+      add(summaryParent, 'summary', '内容概括 · 展开阅读');
+    }
+    const summary = add(summaryParent, 'p', undefined, 'connected-summary');
     const points = add(box, 'ul', undefined, 'connected-points');
-    const nodes = [summary, ...current.keyPoints.map(() => add(points, 'li'))];
+    const more = add(box, 'details'); more.hidden = current.keyPoints.length <= 3;
+    add(more, 'summary', `其余 ${Math.max(0, current.keyPoints.length - 3)} 条重点`);
+    const morePoints = add(more, 'ul', undefined, 'connected-points');
+    const nodes = [summary, ...current.keyPoints.map((point, index) => add(index < 3 ? points : morePoints, 'li'))];
     const texts = [current.summary, ...current.keyPoints];
     const focusSections = texts.map(text => D.focusParts(text, current.keyPoints));
-    const retry = button(box, '重试摘要标注', () => { summaryReadings.delete(current); start(); }, 'text-button');
+    const retry = button(options, '重试摘要标注', () => { summaryReadings.delete(current); start(); }, 'text-button');
     function paint() {
       const compact = readingMode === 'focus';
       const state = summaryReadings.get(current);
@@ -199,9 +219,9 @@
     const tasks = add(box, 'ul', undefined, 'ruled-list');
     review.tasks.forEach((task, index) => {
       const item = add(tasks, 'li'), edited = edits[index];
-      add(item, 'h3', edited.title); add(item, 'p', '截止日期：' + dateText(edited.dueDate));
-      if (edited.requirements) add(item, 'p', edited.requirements);
-      add(item, 'small', 'AI 建议第一步：' + task.suggestion.text);
+      add(item, 'h3', edited.title); add(item, 'p', '截止：' + dateText(edited.dueDate), 'task-due');
+      renderRequirements(item, edited.requirements);
+      add(item, 'p', '建议先做：' + task.suggestion.text, 'task-first-step');
       const details = add(item, 'details'); add(details, 'summary', sourceLabel(task.source)); renderSource(details, task.source, analysisTopics(), grammarContext());
       if (mode === 'demo' && caseKey === 'focus') details.open = true;
       const state = taskDisclosures.get(task.clientTaskId) || { open: false };
@@ -361,8 +381,9 @@
       add(savedBox, 'h2', group.label); add(savedBox, 'p', '这些任务尚未生成建议日程或提醒。', 'quiet-note');
       group.tasks.forEach(task => {
         const card = add(savedBox, 'article', undefined, 'schedule-card'); add(card, 'h3', task.title);
-        add(card, 'p', dateText(task.due_date)); if (task.requirements) add(card, 'p', task.requirements);
-        add(card, 'small', 'AI 建议第一步：' + task.first_step);
+        add(card, 'p', '截止：' + dateText(task.due_date), 'task-due');
+        add(card, 'p', '建议先做：' + task.first_step, 'task-first-step');
+        renderRequirements(card, task.requirements);
         const source = add(card, 'details'); add(source, 'summary', task.source_kind === 'user-context' ? '用户补充说明' : '原文依据');
         renderSource(source, { quote: task.source_quote, kind: task.source_kind }, [task.title, task.requirements]);
       });
@@ -375,10 +396,29 @@
   const connectionFeedback = add(analysisFields, 'p', '正在检查服务…', 'quiet-note');
   connectionFeedback.setAttribute('role', 'status');
   const settings = add(analysisFields, 'details'); settings.hidden = !api.capabilities.configure;
-  add(settings, 'summary', '配置 DeepSeek API Key');
-  const keyInput = field(settings, 'DeepSeek API Key（仅本次运行有效）', 'connected-api-key', 'password', '');
+  add(settings, 'summary', '配置 AI 服务');
+  const providerLabel = add(settings, 'label', '选择 API 服务', 'connected-label');
+  providerLabel.htmlFor = 'connected-provider';
+  const providerSelect = add(settings, 'select'); providerSelect.id = 'connected-provider';
+  for (const [value, label] of [['deepseek', 'DeepSeek'], ['custom', '自定义 API（OpenAI 兼容）']]) {
+    const option = add(providerSelect, 'option', label); option.value = value;
+  }
+  const baseInput = field(settings, 'API Base URL', 'connected-api-base', 'url', 'https://api.deepseek.com');
+  const modelInput = field(settings, '模型 ID', 'connected-api-model', 'text', 'deepseek-flash');
+  add(settings, 'p', '支持 OpenAI 兼容 Chat Completions 接口。地址需包含服务商要求的 /v1 等前缀。连接时检查 /models，模型可用性以实际分析为准；切换服务请重新填写对应 Key。', 'quiet-note');
+  const keyInput = field(settings, 'API Key（仅本次运行有效）', 'connected-api-key', 'password', '');
+  providerSelect.addEventListener('change', () => {
+    keyInput.value = '';
+    if (providerSelect.value === 'deepseek') {
+      baseInput.value = 'https://api.deepseek.com'; modelInput.value = 'deepseek-flash';
+    } else {
+      baseInput.value = ''; modelInput.value = '';
+      baseInput.placeholder = 'https://你的服务地址/v1'; modelInput.placeholder = '服务商提供的模型 ID';
+    }
+    keyFeedback.textContent = '填写对应密钥并点击验证后才会切换；当前服务暂不改变。';
+  });
   keyInput.autocomplete = 'off'; keyInput.spellcheck = false; keyInput.maxLength = 512;
-  add(settings, 'p', '密钥只交给本机服务验证，保留在运行内存中；关闭服务后需重新输入，不写入浏览器存储。', 'quiet-note');
+  add(settings, 'p', '密钥经本机后端发送到你填写的 API 地址验证，保留在运行内存中；关闭服务后需重新输入，不写入浏览器存储。', 'quiet-note');
   const keyFeedback = add(settings, 'p', '', 'feedback'); keyFeedback.setAttribute('role', 'status');
   const keyButton = button(settings, '验证并连接', async () => {
     if (busy) return;
@@ -386,7 +426,7 @@
     if (!candidate) { keyFeedback.textContent = '请先填写完整密钥。'; return; }
     busy = true; analysisFields.disabled = true; analyzeButton.disabled = true;
     keyFeedback.textContent = '正在验证…';
-    try { await api.configureKey(candidate); keyFeedback.textContent = '验证通过，可以提取任务了。'; settings.open = false; await refreshConnection(); }
+    try { await api.configureKey(candidate, baseInput.value.trim(), modelInput.value.trim()); keyFeedback.textContent = '验证通过，可以提取任务了。'; settings.open = false; await refreshConnection(); }
     catch (error) { keyFeedback.textContent = error.message; }
     finally { candidate = ''; busy = false; analysisFields.disabled = false; analyzeButton.disabled = false; }
   });
@@ -395,17 +435,41 @@
     try {
       const health = await api.health();
       connectionFeedback.textContent = `录音转文字：${health.audio?.ready ? '准备就绪' : '环境尚未准备好'}；AI 分析：${health.key_configured ? '已配置密钥' : '请先配置密钥'}。`;
+      if (health.base_url) baseInput.value = health.base_url;
+      if (health.model) modelInput.value = health.model;
+      providerSelect.value = health.base_url === 'https://api.deepseek.com' ? 'deepseek' : 'custom';
+      for (const entry of apiEntries) entry.textContent = '切换 API · ' + (health.key_configured ? (health.model || '已连接') : '未连接');
       settings.open = !health.key_configured;
       transcribeButton.disabled = !health.audio?.ready;
     } catch (error) { connectionFeedback.textContent = error.message; }
   }
   button(analysisFields, '重新检查连接', refreshConnection);
+  add(analysisFields, 'h3', '从飞书导入文字');
+  const feishuUrl = field(analysisFields, '飞书文档链接', 'connected-feishu-url', 'url', '');
+  add(analysisFields, 'p', '妙记完成转写后，先导出为飞书文档，再粘贴 docx 链接。当前不直接同步妙记或录音豆。', 'quiet-note');
+  const feishuFeedback = add(analysisFields, 'p', '', 'feedback'); feishuFeedback.setAttribute('role', 'status');
+  button(analysisFields, '读取飞书正文', async () => {
+    if (busy) return;
+    if (textInput.value.trim() && !window.confirm('导入成功后替换当前文字，继续吗？')) return;
+    busy = true; analysisFields.disabled = true; analyzeButton.disabled = true;
+    feishuFeedback.textContent = '正在读取…';
+    try {
+      const response = await fetch('/api/import/feishu', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({url: feishuUrl.value.trim()}), signal: AbortSignal.timeout(70000)});
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || '导入失败');
+      if (typeof result.text !== 'string') throw new Error('正文格式错误');
+      textInput.value = result.text; transcribedFile = null; updateTextCount();
+      if (readingPreview.open) updateReadingPreview();
+      feishuFeedback.textContent = '正文已导入，请核对文字、日期和身份，再点击提炼。';
+    } catch (error) { feishuFeedback.textContent = error.message + ' 原输入保留。'; }
+    finally { busy = false; analysisFields.disabled = false; analyzeButton.disabled = false; }
+  });
   add(analysisFields, 'h3', '1. 选择录音');
-  const audioInput = field(analysisFields, '录音文件（最多25 MB、10分钟）', 'connected-audio-file', 'file', '');
+  const audioInput = field(analysisFields, '录音文件（最多8 GB、3小时）', 'connected-audio-file', 'file', '');
   audioInput.accept = '.wav,.mp3,.m4a,.mp4,.aac,.ogg,.flac,.webm'; audioInput.disabled = !api.capabilities.transcribe;
   const player = add(analysisFields, 'audio'); player.controls = true; player.preload = 'metadata'; player.hidden = true;
   const audioFeedback = add(analysisFields, 'p', '', 'feedback'); audioFeedback.setAttribute('role', 'status');
-  add(analysisFields, 'p', '录音在这台电脑上转写，不上传到 DeepSeek。先用30秒至2分钟的清晰录音测试。', 'quiet-note');
+  add(analysisFields, 'p', '录音在这台电脑上转写，不上传到 AI 服务。处理时会临时写入本机磁盘，结束后删除；请预留至少10 GB空间。长录音转写可能较慢；几小时的录音建议先在飞书妙记转写，再导入文字。', 'quiet-note');
   audioInput.addEventListener('change', () => {
     selectedAudio = audioInput.files[0] || null;
     if (audioUrl) URL.revokeObjectURL(audioUrl);
@@ -419,19 +483,20 @@
     if (!selectedAudio) { audioFeedback.textContent = '请先选择一段录音。'; return; }
     if (textInput.value.trim() && !window.confirm('转写成功后会替换当前文字，是否继续？')) return;
     busy = true; analysisFields.disabled = true; analyzeButton.disabled = true;
-    audioFeedback.textContent = '正在本机转写，首次加载模型可能较慢，请保持页面打开…';
+    audioFeedback.textContent = '正在本机分段转写，长录音可能耗时数小时。请保持电脑唤醒和页面打开；刷新或超时后需重新上传…';
     try {
       const result = await api.transcribe(selectedAudio);
       if (!result.text.trim()) { audioFeedback.textContent = '没有识别出语音，已有文字保留。请换一段声音清晰的录音。'; return; }
       textInput.value = result.text; transcribedFile = selectedAudio; updateReadingPreview();
       audioFeedback.textContent = `转写完成（约${Math.round(result.duration)}秒）。请回听并校对文字，再点击“提炼重点与任务”。`;
-      if (result.text.length > 12000) audioFeedback.textContent += '文字超过12000字，请分段整理。';
+      if (Array.from(result.text).length > 100000) audioFeedback.textContent += '文字超过10万字，请分段整理。';
     } catch (error) { audioFeedback.textContent = error.message + ' 已有文字未覆盖。'; }
     finally { busy = false; analysisFields.disabled = false; analyzeButton.disabled = false; }
   }, 'primary');
   add(analysisFields, 'h3', '2. 校对文字与录音日期');
   const titleInput = field(analysisFields, '便签标题', 'connected-input-title', 'text', '本次学习记录'); titleInput.maxLength = 100; titleInput.required = true;
-  const textInput = field(analysisFields, '录音文字', 'connected-input-text', 'textarea', ''); textInput.rows = 6; textInput.required = true; textInput.maxLength = 12000;
+  const textInput = field(analysisFields, '录音文字', 'connected-input-text', 'textarea', ''); textInput.rows = 6; textInput.required = true; textInput.maxLength = 200000;
+  const textCount = add(analysisFields, 'p', '0 / 100000 字（含补充说明）', 'quiet-note');
   const readingPreview = add(analysisFields, 'details');
   add(readingPreview, 'summary', '彩色阅读预览');
   const previewBody = add(readingPreview, 'div');
@@ -440,13 +505,19 @@
     if (textInput.value.trim()) renderSource(previewBody, { quote: textInput.value, kind: 'transcript' });
     else add(previewBody, 'p', '转写或输入文字后，可在这里查看重点提示。', 'quiet-note');
   }
-  textInput.addEventListener('input', updateReadingPreview);
+  textInput.addEventListener('input', () => { if (readingPreview.open) updateReadingPreview(); });
   readingPreview.addEventListener('toggle', () => { if (readingPreview.open) updateReadingPreview(); });
   updateReadingPreview();
   const today = new Date(); const todayString = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   const dateInput = field(analysisFields, '实际录音日期', 'connected-input-date', 'date', todayString); dateInput.required = true; dateInput.min = '0001-01-01'; dateInput.max = '9999-12-31';
   const contextInput = field(analysisFields, '身份或补充说明（选填）', 'connected-input-context', 'textarea', ''); contextInput.rows = 2; contextInput.maxLength = 2000;
-  add(analysisForm, 'p', '点击后，文字及补充说明会经后端发送给 DeepSeek，可能产生 API 费用。默认显示少量主谓宾高亮；摘要与要点会额外请求一次标注，不为凑高亮自动重试。', 'quiet-note');
+  function updateTextCount() {
+    textCount.textContent = `${Array.from(textInput.value).length + Array.from(contextInput.value).length} / 100000 字（含补充说明，提交时另计分隔文字）`;
+  }
+  textInput.addEventListener('input', updateTextCount);
+  contextInput.addEventListener('input', updateTextCount);
+  add(analysisForm, 'p', '支持最多10万字输入；需要服务商模型具备足够的上下文容量。长文可能等待约3分钟，费用也会增加。当前每次最多提取3项任务，不保证覆盖长文所有待办。', 'quiet-note');
+  add(analysisForm, 'p', '点击后，文字及补充说明会经后端发送给当前配置的 AI 服务，可能产生 API 费用。默认显示少量主谓宾高亮；摘要与要点会额外请求一次标注，不为凑高亮自动重试。', 'quiet-note');
   const analysisFeedback = add(analysisForm, 'p', '', 'feedback'); analysisFeedback.setAttribute('role', 'status');
   const analyzeButton = add(analysisForm, 'button', '提炼重点与任务', 'primary'); analyzeButton.type = 'submit';
   analysisForm.addEventListener('submit', event => {
@@ -493,10 +564,30 @@
     if (busy || pending) { shell.toast('请先处理当前保存请求。', true); return; }
     analysisDialog.showModal(); refreshConnection();
   }
+  async function openAPISettings() {
+    if (busy || pending) { shell.toast('请先完成当前请求。', true); return; }
+    analysisDialog.showModal();
+    await refreshConnection();
+    settings.open = true;
+    settings.scrollIntoView({block: 'start'});
+    providerSelect.focus();
+  }
+  const apiEntries = [$('#home-view'), $('#profile-view')].map(parent => {
+    const entry = button(parent, '切换 API', openAPISettings);
+    entry.hidden = !api.capabilities.configure;
+    return entry;
+  });
   const audioEntry = button($('#home-view'), '上传录音，开始整理', openAnalysis, 'primary');
   audioEntry.disabled = !api.capabilities.transcribe;
   $('#home-view').insertBefore(audioEntry, $('#home-view .metadata'));
-  button($('#home-view'), '整理一段文字', openAnalysis);
+  button($('#home-view'), '整理一段文字', () => {
+    openAnalysis();
+    if (analysisDialog.open) { textInput.scrollIntoView({block: 'center'}); textInput.focus(); }
+  });
+  button($('#home-view'), '导入飞书文档', () => {
+    openAnalysis();
+    if (analysisDialog.open) { feishuUrl.scrollIntoView({block: 'center'}); feishuUrl.focus(); }
+  });
   analysisDialog.addEventListener('close', () => { keyInput.value = ''; });
   const noteCard = button($('#home-view'), '', () => { if (!review) return; active = true; render(); shell.navigate('detail'); }, 'record-card');
   noteCard.id = 'connected-note-card'; noteCard.hidden = true;
